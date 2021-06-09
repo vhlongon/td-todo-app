@@ -1,44 +1,38 @@
-import * as React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import Heading from './Heading';
+import List from './List';
 
-interface HeadingProps {
+interface Payload {
   text: string;
 }
-const Heading = ({ text }: HeadingProps) => <h2>{text}</h2>;
 
-interface BoxProps {
-  children: React.ReactNode;
-}
-const Box = ({ children }: BoxProps) => (
-  <div style={{ padding: '1rem', fontWeight: 'bold' }}>{children}</div>
-);
-
-interface ListProps {
-  items: string[];
-  onClick?: (item: string) => void;
-}
-const List = ({ items, onClick }: ListProps) => {
-  return (
-    <ul>
-      {items.map((item, index) => (
-        <li key={index} onClick={() => onClick?.(item)}>
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-};
-
-export interface IAppProps {}
-
-export default function App(props: IAppProps) {
-  const handleClick = React.useCallback((item: string) => {
+export default function App() {
+  const handleClick = useCallback((item: string) => {
     alert(item);
+  }, []);
+
+  const [data, setData] = useState<Payload | null>(null);
+
+  useEffect(() => {
+    const fetchData = async (): Promise<Payload> => {
+      const res = await fetch('./data.json');
+      const data = await res.json();
+      return data;
+    };
+
+    fetchData().then(setData);
   }, []);
 
   return (
     <div>
       <Heading text="Typescript React todo app" />
-      <List items={['one']} onClick={handleClick} />
+      <List items={['one', 'two', 'three']} onClick={handleClick} />
+      {data && (
+        <div>
+          <Heading text="Payload" />
+          <code>{JSON.stringify(data)}</code>
+        </div>
+      )}
     </div>
   );
 }
